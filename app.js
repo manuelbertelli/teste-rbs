@@ -1,119 +1,144 @@
 (function () {
-  'use strict';
+    'use strict';
 
-  // Const
-  var ORDERING_TYPES = {
-    "normal": {
-      "name": "Sem ordenação",
-      "value": ""
-    },
-    "asc": {
-      "name": "Ascendente",
-      "value": "asc"
-    },
-    "desc": {
-      "name": "Descendente",
-      "value": "desc"
+    var ORDERING_TYPES, ORDERING_LIST, PhraseSplitView, PhraseReorder, pr;
+
+    ORDERING_TYPES = {
+        "normal": {
+            "name": "Sem ordenação",
+            "value": "normal"
+        },
+        "asc": {
+            "name": "Ascendente",
+            "value": "asc"
+        },
+        "desc": {
+            "name": "Descendente",
+            "value": "desc"
+        }
+    };
+
+    ORDERING_LIST = [ "normal", "asc", "desc" ];
+
+    function generateOptions(text, value) {
+        var option = document.createElement("option");
+
+        option.textContent = text;
+        option.value = value;
+
+        return option;
     }
-  };
 
-  var ORDERING_LIST = [ "normal", "asc", "desc" ];
+    function generateLists(text) {
+        var li = document.createElement("li");
 
-  // Helpers
-  function generateOptions(text, value) {
-    var option = document.createElement("option");
+        li.textContent = text;
 
-    option.textContent = text;
-    option.value = value;
+        return li;
+    }
 
-    return option;
-  }
+    function bindEvents() {
+        var that = this;
 
-  function generateLists(text) {
-    var li = document.createElement("li");
+        this.inputField.addEventListener("input", function () {
+            that.renderResults();
+        }, false);
 
-    li.textContent = text;
+        this.select.addEventListener("change", function () {
+            that.ordering = this.value;
+            that.renderResults();
+        }, false);
+    }
 
-    return li;
-  }
-
-  function bindEvents() {
-    var that = this;
-
-    this.inputField.addEventListener("input", function (e) {
-      console.log("Input phrase: ", e.currentTarget.value);
-      that.renderResults(this.value);
-    }, false);
-  }
-
-  // Class PhraseSplitView
-  var PhraseSplitView = function () {
-    this.aValues = null;
-    this.unorderedList = document.createElement("ul");
-    this.wrapper = document.body.createElement("div");
-  }
-
-  PhraseSplitView.prototype.init = function () {
-
-  }
-
-  PhraseSplitView.prototype.setElements = function (aValues) {
-    this.aValues = aValues;
-
-    return this;
-  }
-
-  PhraseSplitView.prototype.render = function () {
-    for (var i = 0; i < this.aValues.length; i++) {
-      this.unorderedList.appendChild(generateLists(this.aValues[i]));
+    PhraseSplitView = function () {
+        this.aValues = null;
+        this.unorderedList = document.createElement("ul");
+        this.wrapper = document.createElement("div");
     };
 
-    console.log("PhraseSplitView: ", this);
-
-    // TODO: PAREI AQUI
-
-    return this;
-  }
-
-  // Class PhraseOrder (Main.app)
-  var PhraseReorder = function () {
-    this.inputField = document.createElement("input");
-    this.select = document.createElement("select");
-    this.phraseSplitView = new PhraseSplitView();
-  }
-
-  // Methods
-  PhraseReorder.prototype.init = function () {
-    bindEvents.call(this);
-
-    return this;
-  }
-
-  PhraseReorder.prototype.render = function () {
-    for (var i = 0; i < ORDERING_LIST.length; i++) {
-      var index = ORDERING_LIST[i];
-      var text = ORDERING_TYPES[index]["name"];
-      var value = ORDERING_TYPES[index]["value"];
-
-      this.select.appendChild(generateOptions(text, value));
+    PhraseSplitView.prototype.init = function () {
+        this.wrapper.appendChild(this.unorderedList);
+        document.body.appendChild(this.wrapper);
     };
 
-    document.body.appendChild(this.inputField);
-    document.body.appendChild(this.select);
+    PhraseSplitView.prototype.setElements = function (aValues) {
+        this.aValues = aValues;
 
-    return this;
-  }
+        return this;
+    };
 
-  PhraseReorder.prototype.renderResults = function (sValues) {
-    var aValues = sValues.split(" ");
+    PhraseSplitView.prototype.cleanup = function () {
+        this.unorderedList.innerHTML = "";
 
-    this.phraseSplitView.setElements(aValues).render();
+        return this;
+    };
 
-    return this;
-  }
+    PhraseSplitView.prototype.render = function () {
+        var i;
 
-  var pr = new PhraseReorder();
+        for (i = 0; i < this.aValues.length; i += 1) {
+            this.unorderedList.appendChild(generateLists(this.aValues[i]));
+        }
 
-  pr.init().render();
+        return this;
+    };
 
-})();
+    PhraseReorder = function () {
+        this.inputField = document.createElement("input");
+        this.select = document.createElement("select");
+        this.phraseSplitView = new PhraseSplitView();
+        this.ordering = ORDERING_LIST[0];
+    };
+
+    PhraseReorder.prototype.init = function () {
+        bindEvents.call(this);
+
+        return this;
+    };
+
+    PhraseReorder.prototype.render = function () {
+        var i, index, text, value;
+
+        for (i = 0; i < ORDERING_LIST.length; i += 1) {
+            index = ORDERING_LIST[i];
+            text = ORDERING_TYPES[index].name;
+            value = ORDERING_TYPES[index].value;
+
+            this.select.appendChild(generateOptions(text, value));
+        }
+
+        document.body.appendChild(this.inputField);
+        document.body.appendChild(this.select);
+        this.phraseSplitView.init();
+
+        return this;
+    };
+
+    PhraseReorder.prototype.renderResults = function () {
+        var aValues;
+
+        aValues = this.inputField.value.trim().split(" ");
+        aValues = aValues.filter(function (item) {
+            return item;
+        });
+
+        if (this.ordering === "asc") {
+            aValues.sort();
+        } else if (this.ordering === "desc") {
+            aValues.sort().reverse();
+        }
+
+        this.phraseSplitView.cleanup();
+
+        if (this.inputField.value.trim() !== "") {
+            this.phraseSplitView.setElements(aValues).render();
+        }
+
+        return this;
+    };
+
+    pr = new PhraseReorder();
+
+    pr.init().render();
+
+}());

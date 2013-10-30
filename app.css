@@ -1,0 +1,15 @@
+input {
+	width: 200px;
+	border: 1px solid lightgray;
+	border-radius: 5px;
+	padding: 7px;
+	font-weight: 12px;
+}
+
+select {
+	margin-left: 10px;
+}
+
+li {
+	font: 12px Arial;
+}
