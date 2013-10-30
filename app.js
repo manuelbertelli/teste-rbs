@@ -53,12 +53,10 @@
     PhraseSplitView = function () {
         this.aValues = null;
         this.unorderedList = document.createElement("ul");
-        this.wrapper = document.createElement("div");
     };
 
     PhraseSplitView.prototype.init = function () {
-        this.wrapper.appendChild(this.unorderedList);
-        document.body.appendChild(this.wrapper);
+        document.body.appendChild(this.unorderedList);
     };
 
     PhraseSplitView.prototype.setElements = function (aValues) {
