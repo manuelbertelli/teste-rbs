@@ -50,6 +50,10 @@
         }, false);
     }
 
+    function compareLength(aString, bString) {
+        return aString.length - bString.length;
+    }
+
     PhraseSplitView = function () {
         this.aValues = null;
         this.unorderedList = document.createElement("ul");
@@ -121,9 +125,9 @@
         });
 
         if (this.ordering === "asc") {
-            aValues.sort();
+            aValues.sort(compareLength);
         } else if (this.ordering === "desc") {
-            aValues.sort().reverse();
+            aValues.sort(compareLength).reverse();
         }
 
         this.phraseSplitView.cleanup();
